@@ -5,3 +5,8 @@ desktop.ini
 # Python
 __pycache__/
 *.pyc
+
+# Never commit the resume or any personal documents to the public repo
+*[Rr]esume*
+*.docx
+*.pdf
