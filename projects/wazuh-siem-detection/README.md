@@ -205,6 +205,8 @@ Most of the problems were during the Wazuh install (wrong network adapter, defau
 
 ## What I'd do next
 
-- Add Suricata so network attacks like port scans show up in Wazuh too
+- Add Suricata so network attacks like port scans show up in Wazuh too. I did this in my [next project](../suricata-ids-detection/)
 - Set up active response so Wazuh can block an IP itself, not just alert
 - Add a Windows machine and Active Directory to the lab and write rules for Windows logons
+
+I added Suricata to the lab and caught the port scan in [Network IDS with Suricata](../suricata-ids-detection/).

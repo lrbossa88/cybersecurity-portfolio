@@ -1,0 +1,29 @@
+# Suricata fast.log during nmap scans from Kali (192.168.56.102) against Ubuntu (192.168.56.101)
+# 06:00:17 - 06:00:27  sudo nmap -sS -p- 192.168.56.101   (full SYN scan, all 65535 ports)
+# 06:01:04 onward      sudo nmap -A 192.168.56.101        (OS detection, version detection, default scripts)
+
+11/03/2026-06:00:17.029375  [**] [1:2010937:3] ET SCAN Suspicious inbound to mySQL port 3306 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:40439 -> 192.168.56.101:3306
+11/03/2026-06:00:20.051058  [**] [1:2010939:3] ET SCAN Suspicious inbound to PostgreSQL port 5432 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:40439 -> 192.168.56.101:5432
+11/03/2026-06:00:21.002964  [**] [1:2002910:6] ET SCAN Potential VNC Scan 5800-5820 [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.102:40439 -> 192.168.56.101:5803
+11/03/2026-06:00:22.701400  [**] [1:2010936:3] ET SCAN Suspicious inbound to Oracle SQL port 1521 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:40439 -> 192.168.56.101:1521
+11/03/2026-06:00:27.595135  [**] [1:2010935:3] ET SCAN Suspicious inbound to MSSQL port 1433 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:40439 -> 192.168.56.101:1433
+11/03/2026-06:01:04.167273  [**] [1:2010937:3] ET SCAN Suspicious inbound to mySQL port 3306 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:51540 -> 192.168.56.101:3306
+11/03/2026-06:01:04.215514  [**] [1:2010935:3] ET SCAN Suspicious inbound to MSSQL port 1433 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:51540 -> 192.168.56.101:1433
+11/03/2026-06:01:04.263641  [**] [1:2010936:3] ET SCAN Suspicious inbound to Oracle SQL port 1521 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:51540 -> 192.168.56.101:1521
+11/03/2026-06:01:04.357883  [**] [1:2010939:3] ET SCAN Suspicious inbound to PostgreSQL port 5432 [**] [Classification: Potentially Bad Traffic] [Priority: 2] {TCP} 192.168.56.102:51540 -> 192.168.56.101:5432
+11/03/2026-06:01:04.688123  [**] [1:2001219:20] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.102:61960 -> 192.168.56.101:22
+11/03/2026-06:01:05.114142  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.102:8 -> 192.168.56.101:9
+11/03/2026-06:01:05.114177  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.101:0 -> 192.168.56.102:9
+11/03/2026-06:01:05.165901  [**] [1:2018489:4] ET SCAN NMAP OS Detection Probe [**] [Classification: Attempted Information Leak] [Priority: 2] {UDP} 192.168.56.102:39604 -> 192.168.56.101:42410
+11/03/2026-06:01:07.231204  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.102:8 -> 192.168.56.101:9
+11/03/2026-06:01:07.231226  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.101:0 -> 192.168.56.102:9
+11/03/2026-06:01:07.282907  [**] [1:2018489:4] ET SCAN NMAP OS Detection Probe [**] [Classification: Attempted Information Leak] [Priority: 2] {UDP} 192.168.56.102:39860 -> 192.168.56.101:42410
+11/03/2026-06:01:09.349487  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.102:8 -> 192.168.56.101:9
+11/03/2026-06:01:09.349506  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.101:0 -> 192.168.56.102:9
+11/03/2026-06:01:09.400898  [**] [1:2018489:4] ET SCAN NMAP OS Detection Probe [**] [Classification: Attempted Information Leak] [Priority: 2] {UDP} 192.168.56.102:40116 -> 192.168.56.101:42410
+11/03/2026-06:01:12.968042  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.102:8 -> 192.168.56.101:9
+11/03/2026-06:01:12.968068  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.101:0 -> 192.168.56.102:9
+11/03/2026-06:01:13.019128  [**] [1:2018489:4] ET SCAN NMAP OS Detection Probe [**] [Classification: Attempted Information Leak] [Priority: 2] {UDP} 192.168.56.102:40372 -> 192.168.56.101:42410
+11/03/2026-06:01:15.086444  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.102:8 -> 192.168.56.101:9
+11/03/2026-06:01:15.086485  [**] [1:2200025:2] SURICATA ICMPv4 unknown code [**] [Classification: Generic Protocol Command Decode] [Priority: 3] {ICMP} 192.168.56.101:0 -> 192.168.56.102:9
+11/03/2026-06:01:15.134918  [**] [1:2018489:4] ET SCAN NMAP OS Detection Probe [**] [Classification: Attempted Information Leak] [Priority: 2] {UDP} 192.168.56.102:40628 -> 192.168.56.101:42410

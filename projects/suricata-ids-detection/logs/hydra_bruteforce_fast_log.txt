@@ -1,0 +1,5 @@
+# Suricata fast.log during Hydra SSH brute force from Kali (192.168.56.102) against Ubuntu (192.168.56.101)
+# hydra -l labuser1 -P ~/lab_passwords.txt -t 4 -V ssh://192.168.56.101
+
+11/03/2026-06:14:20.290783  [**] [1:2001219:20] ET SCAN Potential SSH Scan [**] [Classification: Attempted Information Leak] [Priority: 2] {TCP} 192.168.56.102:33246 -> 192.168.56.101:22
+11/03/2026-06:14:20.481781  [**] [1:2006546:9] ET SCAN LibSSH Based Frequent SSH Connections Likely BruteForce Attack [**] [Classification: Attempted Administrator Privilege Gain] [Priority: 1] {TCP} 192.168.56.102:33246 -> 192.168.56.101:22

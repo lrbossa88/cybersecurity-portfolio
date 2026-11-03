@@ -1,0 +1,11 @@
+# fail2ban log for the same Hydra attack, to compare timing with Suricata
+# Suricata brute force alert (Priority 1) fired at 06:14:20.481
+
+2026-11-03 06:14:23,272 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:23
+2026-11-03 06:14:23,754 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:23
+2026-11-03 06:14:25,906 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:25
+2026-11-03 06:14:26,231 fail2ban.actions        [1074]: NOTICE  [sshd] Ban 192.168.56.102
+2026-11-03 06:14:26,256 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:26
+2026-11-03 06:14:26,754 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:26
+2026-11-03 06:14:26,755 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:26
+2026-11-03 06:14:28,504 fail2ban.filter         [1074]: INFO    [sshd] Found 192.168.56.102 - 2026-11-03 06:14:28

@@ -46,7 +46,8 @@ This is the current state of the lab. Each item links to the project where I set
 - `labuser1`, a regular test account with no sudo, so all test activity is tied to one user and my real admin account never gets locked out
 - fail2ban: bans an IP after 5 failed SSH logins in 10 minutes for 10 minutes, my Windows host is excluded so I can't lock myself out ([SSH project](../projects/ssh-attack-detection/))
 - tcpdump for packet captures ([network project](../projects/network-traffic-investigation/))
-- Wazuh agent `ubuntu-target`, sending the system journal to the Wazuh server ([Wazuh project](../projects/wazuh-siem-detection/))
+- Suricata 8.0.3 network IDS with the ET Open rules, listening on enp0s8, alerts sent to Wazuh ([Suricata project](../projects/suricata-ids-detection/))
+- Wazuh agent `ubuntu-target`, sending the system journal and Suricata alerts to the Wazuh server ([Wazuh project](../projects/wazuh-siem-detection/))
 
 **Wazuh (SIEM)**
 - Wazuh manager, indexer and dashboard 4.14.9, dashboard at `https://192.168.56.103`

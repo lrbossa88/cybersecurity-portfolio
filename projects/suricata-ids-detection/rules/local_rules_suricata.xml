@@ -1,0 +1,9 @@
+<!-- Added to /var/ossec/etc/rules/local_rules.xml on the Wazuh server -->
+<!-- Raises Suricata severity 1 alerts from level 3 (default rule 86601) to level 12 -->
+<group name="suricata,">
+  <rule id="100200" level="12">
+    <if_sid>86601</if_sid>
+    <field name="alert.severity">^1$</field>
+    <description>Suricata high severity alert: $(alert.signature)</description>
+  </rule>
+</group>
