@@ -14,7 +14,7 @@ The lab projects build on each other: I found an SSH brute force in the logs, th
 | [SIEM Detection with Wazuh: Finding and Fixing a Detection Gap](projects/wazuh-siem-detection/) | Connected Ubuntu to a Wazuh SIEM and re-ran my attacks. Found that a successful login after failed attempts only raised a level 3 alert, so I **wrote a custom Wazuh rule** that raises a level 12 and tested it | Wazuh, SIEM alert triage, custom detection rules, MITRE ATT&CK |
 | [Network Traffic Investigation: Port Scan and Brute Force on the Wire](projects/network-traffic-investigation/) | Captured a port scan and an SSH brute force with tcpdump, analyzed them in Wireshark, found nmap's packet fingerprint and caught the fail2ban block in the packets | Packet analysis, tcpdump, Wireshark, nmap, MITRE ATT&CK |
 | [Linux SSH Attack Detection and Defensive Validation](projects/ssh-attack-detection/) | Ran a controlled SSH brute force with Hydra, found it in the logs, triaged it, set up fail2ban and re-tested to prove it blocked the attack | Log analysis, triage, MITRE ATT&CK, fail2ban, Linux hardening |
-| [Home Lab Setup](home-lab/) | Built a Kali, Ubuntu and Wazuh SIEM lab in VirtualBox with NAT and host-only networking. All my lab projects run on this | Virtualization, networking, troubleshooting |
+| [Home Lab Setup](home-lab/) | Built a five VM lab in VirtualBox (Kali, Ubuntu, Windows 11, a Windows Server 2025 domain controller, and a Wazuh SIEM) with NAT and host-only networking. All my lab projects run on this | Virtualization, networking, Active Directory, troubleshooting |
 
 ## Coursework
 
