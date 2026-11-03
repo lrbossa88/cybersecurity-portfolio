@@ -45,7 +45,7 @@ Anyone can download these and open them in Wireshark.
 
 From Kali I pinged Ubuntu 4 times and logged in over SSH once with the right password.
 
-![Baseline handshake in Wireshark](screenshots/02_wireshark_baseline_handshake.png)
+<img src="screenshots/02_wireshark_baseline_handshake.png" alt="Baseline handshake in Wireshark" width="800">
 
 Filter: `tcp.stream eq 0`
 
@@ -66,13 +66,13 @@ sudo nmap -sS 192.168.56.101
 
 `-sS` is a SYN scan, also called a half-open scan. It sends a SYN to each port and never finishes the handshake.
 
-![nmap scan](screenshots/01_nmap_scan.png)
+<img src="screenshots/01_nmap_scan.png" alt="nmap scan" width="800">
 
 nmap found **1 open port (22/ssh)** and 999 closed in 2.3 seconds. It also picked up that the MAC address belongs to a VirtualBox virtual NIC, so the attacker even learns the target is a VM.
 
 ### What it looks like in the packets
 
-![Port scan SYNs](screenshots/03_wireshark_portscan_syns.png)
+<img src="screenshots/03_wireshark_portscan_syns.png" alt="Port scan SYNs" width="800">
 
 Filter: `tcp.flags.syn == 1 && tcp.flags.ack == 0`
 
@@ -85,7 +85,7 @@ Filter: `tcp.flags.syn == 1 && tcp.flags.ack == 0`
 
 Only one port answered:
 
-![Open port](screenshots/04_wireshark_open_port.png)
+<img src="screenshots/04_wireshark_open_port.png" alt="Open port" width="800">
 
 Filter: `tcp.flags.syn == 1 && tcp.flags.ack == 1`
 
@@ -116,7 +116,7 @@ hydra -l labuser1 -P ~/lab_passwords.txt -t 4 -V ssh://192.168.56.101
 
 Same attack as my SSH project, 20 passwords, 4 at a time, with fail2ban on.
 
-![Brute force and ban](screenshots/05_wireshark_bruteforce_ban.png)
+<img src="screenshots/05_wireshark_bruteforce_ban.png" alt="Brute force and ban" width="800">
 
 Filter: `tcp.flags.syn == 1 || icmp`
 

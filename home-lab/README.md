@@ -59,42 +59,40 @@ This is the current state of the lab. Each item links to the project where I set
 
 Both VMs got a NAT adapter and a host-only adapter on the same VirtualBox Host-Only Ethernet Adapter.
 
-![Kali adapter 1 NAT](network/01_kali_adapter1_nat.png)
-![Kali adapter 2 host-only](network/02_kali_adapter2_hostonly.png)
-![Ubuntu adapter 1 NAT](network/03_ubuntu_adapter1_nat.png)
-![Ubuntu adapter 2 host-only](network/04_ubuntu_adapter2_hostonly.png)
+<img src="network/01_kali_adapter1_nat.png" alt="Kali adapter 1 NAT" width="800">
+
+<img src="network/02_kali_adapter2_hostonly.png" alt="Kali adapter 2 host-only" width="800">
+<img src="network/03_ubuntu_adapter1_nat.png" alt="Ubuntu adapter 1 NAT" width="800">
+
+<img src="network/04_ubuntu_adapter2_hostonly.png" alt="Ubuntu adapter 2 host-only" width="800">
 
 Both VMs are on the same host-only adapter, that's what lets them talk to each other.
 
 Kali, both adapters up on their own profiles (`nat` and `hostonly`):
 
-![Kali IP and nmcli status](network/05_kali_ip.png)
+<img src="network/05_kali_ip.png" alt="Kali IP and nmcli status" width="800">
 
 Ubuntu:
 
-![Ubuntu IP](network/06_ubuntu_ip.png)
+<img src="network/06_ubuntu_ip.png" alt="Ubuntu IP" width="800">
 
 Ping from Kali to Ubuntu over the host-only network. 4 sent, 4 received, 0% packet loss:
 
-![Ping Kali to Ubuntu](network/07_ping_kali_to_ubuntu.png)
+<img src="network/07_ping_kali_to_ubuntu.png" alt="Ping Kali to Ubuntu" width="800">
 
 ### Wazuh
 
-I used the official Wazuh 4.14.9 OVA, which comes with the manager, indexer and dashboard already installed, and imported it into VirtualBox (4 CPUs, 8 GB RAM). Same network setup as the other VMs.
+I used the official Wazuh 4.14.9 OVA, which comes with the manager, indexer and dashboard already installed, and imported it into VirtualBox (4 CPUs, 8 GB RAM). Same network setup as the other VMs. The dashboard is at `https://192.168.56.103`, only reachable from my host and the lab VMs.
 
-![Wazuh IP](wazuh/01_wazuh_ip.png)
-
-The dashboard, only reachable from my host and the lab VMs:
-
-![Wazuh dashboard](wazuh/02_wazuh_dashboard_first_login.png)
+<img src="wazuh/01_wazuh_ip.png" alt="Wazuh IP" width="800">
 
 I installed the Wazuh agent on Ubuntu using the command the dashboard generates, pointed at the Wazuh server:
 
-![Agent install](wazuh/03_wazuh_agent_install.png)
+<img src="wazuh/02_wazuh_agent_install.png" alt="Agent install" width="800">
 
 Ubuntu showing up as an active agent:
 
-![Agent active](wazuh/04_wazuh_agent_active.png)
+<img src="wazuh/03_wazuh_agent_active.png" alt="Agent active" width="800">
 
 ## Issues I ran into
 
@@ -115,11 +113,3 @@ After that both adapters stayed connected on their own profiles.
 **Wazuh's second adapter was on Bridged instead of NAT.** `ip -br a` showed a 192.168.4.x address, which is my home network, not VirtualBox NAT (10.0.2.x). That meant the Wazuh dashboard, still on the default `admin/admin` login, could be reached by anything on my Wi-Fi. Switched the adapter to NAT and it came back with 10.0.2.15.
 
 **Wazuh default passwords.** Every copy of the OVA ships with the same logins and they're printed right on the console screen. I changed the VM login with `passwd` and the dashboard `admin` password with Wazuh's password tool, then checked Filebeat could still connect with `sudo filebeat test output`.
-
-**Wazuh dashboard timed out after the password change.** The dashboard service was still running from before the change. Restarting `wazuh-dashboard` fixed it.
-
-## Planned additions
-
-- Suricata (network IDS) feeding into Wazuh, so port scans show up as alerts
-- Firewall
-- Active Directory with a Windows machine

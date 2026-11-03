@@ -20,7 +20,7 @@ FROM log_in_attempts
 WHERE login_time > '18:00:00' AND success = FALSE;
 ```
 
-![after hours failed logins](images/01_after_hours_failed_logins.png)
+<img src="images/01_after_hours_failed_logins.png" alt="after hours failed logins" width="800">
 
 ### Logins on specific dates
 
@@ -34,7 +34,7 @@ WHERE login_date = '2022-05-09' OR login_date = '2022-05-08';
 
 75 results came back.
 
-![logins on specific dates](images/02_logins_on_specific_dates.png)
+<img src="images/02_logins_on_specific_dates.png" alt="logins on specific dates" width="800">
 
 ### Logins from outside Mexico
 
@@ -48,7 +48,7 @@ WHERE NOT country LIKE 'MEX%';
 
 144 results came back.
 
-![logins outside mexico](images/03_logins_outside_mexico.png)
+<img src="images/03_logins_outside_mexico.png" alt="logins outside mexico" width="800">
 
 ### Marketing employees in the East building
 
@@ -62,7 +62,7 @@ WHERE department = 'Marketing' AND office LIKE 'East-%';
 
 7 employees came back. One of them, randerss, has `NULL` for device_id, meaning no machine is assigned to them.
 
-![marketing east building](images/04_marketing_east_building.png)
+<img src="images/04_marketing_east_building.png" alt="marketing east building" width="800">
 
 ### Finance and Sales employees
 
@@ -74,7 +74,7 @@ FROM employees
 WHERE department = 'Finance' OR department = 'Sales';
 ```
 
-![finance and sales](images/05_finance_and_sales.png)
+<img src="images/05_finance_and_sales.png" alt="finance and sales" width="800">
 
 ### Everyone not in IT
 
@@ -88,7 +88,7 @@ WHERE NOT department = 'Information Technology';
 
 161 results came back.
 
-![not IT](images/06_not_it_department.png)
+<img src="images/06_not_it_department.png" alt="not IT" width="800">
 
 ## Part 2: Joining tables for an investigation
 
@@ -104,7 +104,7 @@ INNER JOIN employees ON machines.device_id = employees.device_id;
 
 An inner join only returns rows that match in both tables, so this gives every machine that has an employee assigned.
 
-![inner join machines](images/07_inner_join_machines.png)
+<img src="images/07_inner_join_machines.png" alt="inner join machines" width="800">
 
 ### All machines, even unassigned ones (LEFT JOIN)
 
@@ -116,7 +116,7 @@ LEFT JOIN employees ON machines.device_id = employees.device_id;
 
 A left join keeps every row from the first table (`machines`) even if there's no match. If a machine isn't assigned to anyone, the employee columns come back `NULL`. Useful for finding machines nobody is responsible for.
 
-![left join machines](images/08_left_join_machines.png)
+<img src="images/08_left_join_machines.png" alt="left join machines" width="800">
 
 ### All employees, even without a machine (RIGHT JOIN)
 
@@ -128,7 +128,7 @@ RIGHT JOIN employees ON machines.device_id = employees.device_id;
 
 A right join does the opposite and keeps every row from the second table (`employees`). Anyone without a machine shows `NULL` in the machine columns.
 
-![right join employees](images/09_right_join_employees.png)
+<img src="images/09_right_join_employees.png" alt="right join employees" width="800">
 
 ### Login attempts by employee (INNER JOIN)
 
@@ -140,7 +140,7 @@ INNER JOIN log_in_attempts ON employees.username = log_in_attempts.username;
 
 This connects every login attempt to the employee who made it, with their department and office, so you can see who was logging in from where and whether it worked.
 
-![inner join login attempts](images/10_inner_join_login_attempts.png)
+<img src="images/10_inner_join_login_attempts.png" alt="inner join login attempts" width="800">
 
 ## Takeaway
 

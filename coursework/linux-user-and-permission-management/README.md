@@ -18,7 +18,7 @@ sudo useradd -g research_team researcher9
 
 `sudo` gives me root privileges, `useradd` creates the user, and `-g` sets `research_team` as their primary group. No errors came back so the user was created.
 
-![useradd](images/01_useradd.png)
+<img src="images/01_useradd.png" alt="useradd" width="800">
 
 ### Give them ownership of a file
 
@@ -30,7 +30,7 @@ ls
 sudo chown researcher9 project_r.txt
 ```
 
-![chown](images/02_chown.png)
+<img src="images/02_chown.png" alt="chown" width="800">
 
 ### Add them to a secondary group
 
@@ -44,7 +44,7 @@ sudo usermod researcher9 -a -G sales_team
 
 My first try I had the order wrong (`usermod -a -G researcher9 sales_team`). `-G` takes the group name right after it, so Linux thought `researcher9` was the group and gave me `group 'researcher9' does not exist`. Fixed the order and it worked.
 
-![usermod](images/03_usermod.png)
+<img src="images/03_usermod.png" alt="usermod" width="800">
 
 ### Remove the user when they leave
 
@@ -54,7 +54,7 @@ sudo userdel researcher9
 
 No error came back. I double checked with `cut -d: -f1 /etc/passwd`, which lists all users, and researcher9 was gone.
 
-![userdel](images/04_userdel.png)
+<img src="images/04_userdel.png" alt="userdel" width="800">
 
 ## Part 2: Setting file and directory permissions
 
@@ -68,7 +68,7 @@ ls -la
 
 `-la` shows everything, including hidden files. There was a hidden file `.project_x.txt`, a `drafts` directory and 5 project files.
 
-![permissions at start](images/05_permissions_start.png)
+<img src="images/05_permissions_start.png" alt="permissions at start" width="800">
 
 ### Reading the permission string
 
@@ -92,7 +92,7 @@ chmod o-w project_k.txt
 
 `o` is others and `-w` takes away write. Ran `ls -la` again and it went from `-rw-rw-rw-` to `-rw-rw-r--`.
 
-![chmod project_k](images/06_chmod_project_k.png)
+<img src="images/06_chmod_project_k.png" alt="chmod project_k" width="800">
 
 ### Fix the hidden file
 
@@ -104,7 +104,7 @@ chmod u-w,g-w,g+r .project_x.txt
 
 User and group lose write, group gets read. It went from `-rw--w----` to `-r--r-----`. There can't be any spaces between the comma separated parts or Linux reads them as file names.
 
-![chmod hidden file](images/07_chmod_hidden_file.png)
+<img src="images/07_chmod_hidden_file.png" alt="chmod hidden file" width="800">
 
 ### Lock down the drafts directory
 
@@ -116,7 +116,7 @@ chmod g-x drafts
 
 It went from `drwx--x---` to `drwx------`. researcher2 already had full access so nothing else needed to change.
 
-![chmod drafts](images/08_chmod_drafts.png)
+<img src="images/08_chmod_drafts.png" alt="chmod drafts" width="800">
 
 ## Takeaway
 

@@ -31,7 +31,7 @@ Times in the screenshots are from the Wazuh dashboard, which shows Florida time 
 
 I tried logging in as a user that doesn't exist (`fakeuser`) to make sure events were actually getting to Wazuh.
 
-![test event](screenshots/01_wazuh_test_event.png)
+<img src="screenshots/01_wazuh_test_event.png" alt="test event" width="800">
 
 | Rule | Level | Alert |
 |---|---|---|
@@ -45,7 +45,7 @@ Single failures are level 5, and when they repeat Wazuh correlates them into a l
 
 Same Hydra attack as my other projects: 20 passwords, 4 at a time, against `labuser1`, with fail2ban on.
 
-![hydra alerts](screenshots/02_wazuh_hydra_alerts.png)
+<img src="screenshots/02_wazuh_hydra_alerts.png" alt="hydra alerts" width="800">
 
 I added `data.srcip` and `data.dstuser` as columns so every alert shows where it came from and what account it targeted. The attack lines show 192.168.56.102 going after labuser1. My own sudo activity in the same list shows no source IP and root as the user, so it's easy to tell apart.
 
@@ -69,7 +69,7 @@ I failed 3 times from Kali and then logged in with the right password 30 seconds
 rule.id:(5760 or 2502 or 5715 or 40112)
 ```
 
-![fail then success](screenshots/03_wazuh_fail_then_success.png)
+<img src="screenshots/03_wazuh_fail_then_success.png" alt="fail then success" width="800">
 
 | Time | Rule | Level | Event |
 |---|---|---|---|
@@ -117,7 +117,7 @@ Before restarting I checked it with `sudo /var/ossec/bin/wazuh-analysisd -t`, no
 
 Same test again: 3 wrong passwords, then the right one.
 
-![custom rule fired](screenshots/04_custom_rule_fired.png)
+<img src="screenshots/04_custom_rule_fired.png" alt="custom rule fired" width="800">
 
 | Time | Rule | Level | Event |
 |---|---|---|---|
@@ -133,7 +133,7 @@ It worked both ways:
 
 The alert details have everything I'd need for a ticket:
 
-![custom rule details](screenshots/05_custom_rule_details.png)
+<img src="screenshots/05_custom_rule_details.png" alt="custom rule details" width="800">
 
 - Source IP 192.168.56.102, target user labuser1
 - The raw log line: `Accepted password for labuser1 from 192.168.56.102 port 41158 ssh2`
@@ -148,9 +148,9 @@ sudo nmap -sS 192.168.56.101
 
 Same scan as my network project. 1 open port, 999 closed, 2.3 seconds, at 20:28.
 
-![nmap scan](screenshots/06_nmap_scan.png)
+<img src="screenshots/06_nmap_scan.png" alt="nmap scan" width="800">
 
-![port scan in wazuh](screenshots/07_wazuh_portscan_no_alerts.png)
+<img src="screenshots/07_wazuh_portscan_no_alerts.png" alt="port scan in wazuh" width="800">
 
 This is the last hour of events. Wazuh was clearly working, with events right up to my custom rule test at 20:03. The scan ran at 20:28 and the timeline is flat there. **Nothing showed up in Wazuh.** A SYN scan never finishes a connection or tries to log in, so Ubuntu never writes anything down, and Wazuh can only alert on what gets logged. In my [network project](../network-traffic-investigation/) the same scan was obvious in the packets: 1,000 SYNs in 0.21 seconds. To catch it here I'd need a network IDS like Suricata feeding into Wazuh.
 
@@ -194,7 +194,7 @@ This is the last hour of events. Wazuh was clearly working, with events right up
 
 ## Issues I ran into
 
-Most of the problems were during the Wazuh install (wrong network adapter, default passwords, dashboard timing out after the password change). Those are written up on the [Home Lab](../../home-lab/) page with the rest of the setup.
+Most of the problems were during the Wazuh install (wrong network adapter, default passwords). Those are written up on the [Home Lab](../../home-lab/) page with the rest of the setup.
 
 ## Limitations
 

@@ -30,7 +30,7 @@ Note: Ubuntu logs in UTC and Kali shows Florida time (UTC-5). All times below ar
 
 Before doing anything I checked the firewall and SSH settings so I had a "before" picture.
 
-![SSH baseline config](screenshots/01_ssh_baseline_config.png)
+<img src="screenshots/01_ssh_baseline_config.png" alt="SSH baseline config" width="800">
 
 | Setting | Value | What it means |
 |---|---|---|
@@ -46,7 +46,7 @@ Then I did a few manual logins from Kali to make sure logging worked. This ended
 - 15:09:53 - 3 failed attempts against `labuser1`, a real account
 - 15:10:56 - successful login as `labuser1`
 
-![Baseline logins in journalctl](screenshots/02_journalctl_baseline_logins.png)
+<img src="screenshots/02_journalctl_baseline_logins.png" alt="Baseline logins in journalctl" width="800">
 
 The logs show the difference between a fake username (`Invalid user` / `Failed password for invalid user`) and a real one with a wrong password (`Failed password for labuser1`). Full log: [baseline_ssh_log.txt](logs/baseline_ssh_log.txt)
 
@@ -65,7 +65,7 @@ hydra -l labuser1 -P ~/lab_passwords.txt -t 4 -V ssh://192.168.56.101
 - `-t 4` 4 attempts at a time
 - `-V` show every attempt
 
-![Hydra attack](screenshots/03_hydra_attack.png)
+<img src="screenshots/03_hydra_attack.png" alt="Hydra attack" width="800">
 
 All 20 attempts ran in about 18 seconds. 0 valid passwords found.
 
@@ -79,7 +79,7 @@ sudo journalctl -u ssh --since "2026-11-01 17:11" --until "2026-11-01 17:15" --n
 
 Result was **20**, which matches exactly what Hydra sent.
 
-![Hydra detection log](screenshots/04_hydra_detection_log.png)
+<img src="screenshots/04_hydra_detection_log.png" alt="Hydra detection log" width="800">
 
 Full log: [hydra_attack_log.txt](logs/hydra_attack_log.txt)
 
@@ -134,7 +134,7 @@ ignoreip = 127.0.0.1/8 ::1 192.168.56.1
 - Ban after **5 failures** within **10 minutes**, ban lasts **10 minutes**
 - `ignoreip` keeps my Windows host from ever getting banned, so I can't lock myself out
 
-![fail2ban config](screenshots/05_fail2ban_config.png)
+<img src="screenshots/05_fail2ban_config.png" alt="fail2ban config" width="800">
 
 ### Issue I ran into
 
@@ -146,7 +146,7 @@ I tested it before running the attack by failing 2 logins from Kali and checking
 
 Ran the exact same Hydra command on 2026-11-02.
 
-![Hydra after fail2ban](screenshots/06_hydra_after_fail2ban.png)
+<img src="screenshots/06_hydra_after_fail2ban.png" alt="Hydra after fail2ban" width="800">
 
 fail2ban's log shows the ban:
 
@@ -161,15 +161,15 @@ fail2ban's log shows the ban:
 
 The 2 test failures from earlier were still counted, so Kali hit 5 and got banned about 4 seconds into the attack. Full log: [fail2ban_ban_log.txt](logs/fail2ban_ban_log.txt)
 
-![fail2ban ban](screenshots/07_fail2ban_ban.png)
+<img src="screenshots/07_fail2ban_ban.png" alt="fail2ban ban" width="800">
 
 After the ban, Kali couldn't even reach SSH:
 
-![Kali blocked](screenshots/08_kali_blocked.png)
+<img src="screenshots/08_kali_blocked.png" alt="Kali blocked" width="800">
 
 And from my Windows host (ignored IP) I still had access the whole time:
 
-![fail2ban log during ban](screenshots/09_fail2ban_log_during_ban.png)
+<img src="screenshots/09_fail2ban_log_during_ban.png" alt="fail2ban log during ban" width="800">
 
 ### Before vs after
 
