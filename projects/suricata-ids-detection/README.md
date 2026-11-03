@@ -226,4 +226,8 @@ I restarted `wazuh-manager` and ran all three attacks again.
 - Tune the ICMP alerts so the target's own replies don't create noise
 - Write a Suricata rule of my own for something ET Open doesn't catch
 - Set up Wazuh active response so a level 12 alert can block an IP automatically
-- Add a Windows machine and Active Directory to the lab
+- Add a Windows machine and Active Directory to the lab. I added Windows in my [next project](../windows-sysmon-detection/)
+
+## Next project
+
+I added a Windows 11 machine with Sysmon and attacked it in [Windows Endpoint Detection with Sysmon and Wazuh](../windows-sysmon-detection/).
