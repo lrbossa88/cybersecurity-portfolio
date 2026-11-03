@@ -1,0 +1,23 @@
+<!--
+  Custom Wazuh rule written for this project.
+  Goes in /var/ossec/etc/rules/local_rules.xml on the Wazuh server.
+
+  Why: Wazuh's built-in correlation rule (40112) only fires after its brute force
+  alert, which needs about 8 failures. With fail2ban banning at 5, an attacker
+  who guesses the password in a few tries gets in with only a level 3 alert.
+  This rule closes that gap.
+-->
+
+<!-- Custom rule: successful SSH login after failed attempts from the same IP -->
+<group name="local,sshd,authentication_success,">
+  <rule id="100100" level="12" timeframe="300">
+    <if_sid>5715</if_sid>
+    <if_matched_sid>5760</if_matched_sid>
+    <same_srcip />
+    <description>sshd: successful login for $(dstuser) from $(srcip) after failed attempts. Possible compromised account.</description>
+    <mitre>
+      <id>T1110.001</id>
+      <id>T1078</id>
+    </mitre>
+  </rule>
+</group>

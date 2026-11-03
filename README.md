@@ -1,0 +1,64 @@
+# Cybersecurity Portfolio | Lucas Ribeiro Bossa
+
+I'm working toward a SOC Analyst Tier 1 role. This portfolio has my home lab projects, where I attack and defend my own VMs and document it like a real investigation, plus my coursework from the Google Cybersecurity Certificate.
+
+The lab projects build on each other: I found an SSH brute force in the logs, then looked at it in the packets, then set up a SIEM to catch it automatically and wrote a custom rule for what the SIEM missed.
+
+## Home Lab Projects
+
+| Project | What I did | Skills |
+|---|---|---|
+| [SIEM Detection with Wazuh: Finding and Fixing a Detection Gap](projects/wazuh-siem-detection/) | Connected Ubuntu to a Wazuh SIEM and re-ran my attacks. Found that a successful login after failed attempts only raised a level 3 alert, so I **wrote a custom Wazuh rule** that raises a level 12 and tested it | Wazuh, SIEM alert triage, custom detection rules, MITRE ATT&CK |
+| [Network Traffic Investigation: Port Scan and Brute Force on the Wire](projects/network-traffic-investigation/) | Captured a port scan and an SSH brute force with tcpdump, analyzed them in Wireshark, found nmap's packet fingerprint and caught the fail2ban block in the packets | Packet analysis, tcpdump, Wireshark, nmap, MITRE ATT&CK |
+| [Linux SSH Attack Detection and Defensive Validation](projects/ssh-attack-detection/) | Ran a controlled SSH brute force with Hydra, found it in the logs, triaged it, set up fail2ban and re-tested to prove it blocked the attack | Log analysis, triage, MITRE ATT&CK, fail2ban, Linux hardening |
+| [Home Lab Setup](home-lab/) | Built a Kali, Ubuntu and Wazuh SIEM lab in VirtualBox with NAT and host-only networking. All my lab projects run on this | Virtualization, networking, troubleshooting |
+
+## Coursework
+
+From the Google Cybersecurity Certificate. These are course labs, not real incidents.
+
+| Write-up | What it covers |
+|---|---|
+| [Incident Response Documentation](coursework/incident-response-documentation/) | Incident handler's journal (ransomware, phishing file hash in VirusTotal) and a data leak review against NIST SP 800-53 AC-6 |
+| [SQL Security Investigations](coursework/sql-security-investigations/) | Filtering login attempts (after hours, specific dates, by country) and joining employees, machines and login data |
+| [Linux User and Permission Management](coursework/linux-user-and-permission-management/) | Adding, modifying and removing users, file ownership, and fixing file and directory permissions |
+| [Python Allow List Automation](coursework/python-allow-list-automation/) | Script that removes revoked IPs from an allow list file |
+
+## Skills and Tools
+
+- **SIEM:** Wazuh (alert triage, custom detection rules)
+- **Security tools:** Wireshark, tcpdump, nmap, Hydra, fail2ban, VirusTotal
+- **Log and traffic analysis:** journalctl, Linux auth logs, fail2ban logs, packet captures (pcap)
+- **Systems:** Kali Linux, Ubuntu, Amazon Linux, Windows, Oracle VirtualBox
+- **Languages:** SQL, Python, Bash, Wazuh rule XML
+- **Frameworks:** MITRE ATT&CK, NIST CSF, NIST SP 800-53
+
+## Certifications
+
+- Google Cybersecurity Professional Certificate (Completed)
+- Palo Alto Networks Cortex Foundations (Completed)
+- CompTIA Security+ SY0-701 (In progress)
+
+More details: [certifications](certifications/)
+
+## Project Tracker
+
+**In progress**
+- Nothing right now, next lab project coming soon
+
+**Completed**
+- SIEM Detection with Wazuh: Finding and Fixing a Detection Gap
+- Network Traffic Investigation: Port Scan and Brute Force on the Wire
+- Linux SSH Attack Detection and Defensive Validation
+- Home Lab Setup
+- Google Cybersecurity Certificate coursework
+
+**Planned**
+- Add Suricata (network IDS) to the home lab so port scans show up in Wazuh
+- Add a firewall to the home lab
+- Add Active Directory to the home lab
+
+## Contact
+
+- Email: lrbossa88@gmail.com
+- LinkedIn: [linkedin.com/in/lrbossa88](https://www.linkedin.com/in/lrbossa88)
