@@ -32,7 +32,7 @@ Keeping the testing on host-only means any attack traffic stays inside the lab a
   Kali          Ubuntu          Windows 11         DC01 (Server)      Wazuh (SIEM)
   attacker      target          workstation        lab.local DC       manager + dashboard
   .102          .101            .104               .105               .103
-       all four agents send logs ------------------------------------> Wazuh
+       the three Wazuh agents send logs ------------------------------> Wazuh
 ```
 
 ## What's set up on each machine
