@@ -82,7 +82,7 @@ Ping from Kali to Ubuntu over the host-only network. 4 sent, 4 received, 0% pack
 
 ### Wazuh
 
-I used the official Wazuh 4.14.9 OVA, which comes with the manager, indexer and dashboard already installed, and imported it into VirtualBox (4 CPUs, 8 GB RAM). Same network setup as the other VMs. The dashboard is at `https://192.168.56.103`, only reachable from my host and the lab VMs.
+For the SIEM I used the official Wazuh 4.14.9 OVA, which comes with the manager, indexer and dashboard already installed, and imported it into VirtualBox (4 CPUs, 8 GB RAM). Same network setup as the other VMs. The dashboard is at `https://192.168.56.103`, only reachable from my host and the lab VMs.
 
 <img src="wazuh/01_wazuh_ip.png" alt="Wazuh IP" width="800">
 

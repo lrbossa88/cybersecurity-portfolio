@@ -29,7 +29,7 @@ Times in the screenshots are from the Wazuh dashboard, which shows Florida time 
 
 ## 1. Making sure it works
 
-I tried logging in as a user that doesn't exist (`fakeuser`) to make sure events were actually getting to Wazuh.
+To make sure events were actually getting to Wazuh, I tried logging in as a user that doesn't exist (`fakeuser`).
 
 <img src="screenshots/01_wazuh_test_event.png" alt="test event" width="800">
 
@@ -47,7 +47,7 @@ Same Hydra attack as my other projects: 20 passwords, 4 at a time, against `labu
 
 <img src="screenshots/02_wazuh_hydra_alerts.png" alt="hydra alerts" width="800">
 
-I added `data.srcip` and `data.dstuser` as columns so every alert shows where it came from and what account it targeted. The attack lines show 192.168.56.102 going after labuser1. My own sudo activity in the same list shows no source IP and root as the user, so it's easy to tell apart.
+To make the alerts easier to read I added `data.srcip` and `data.dstuser` as columns, so every alert shows where it came from and what account it targeted. The attack lines show 192.168.56.102 going after labuser1. My own sudo activity in the same list shows no source IP and root as the user, so it's easy to tell apart.
 
 | Time (UTC) | What happened |
 |---|---|
@@ -87,7 +87,7 @@ So with both tools running, **an attacker who guesses right in under 5 tries get
 
 ## 4. The fix: custom rule 100100
 
-I wrote a custom rule in `/var/ossec/etc/rules/local_rules.xml` on the Wazuh server. Full file: [rules/local_rules.xml](rules/local_rules.xml)
+The rule lives in `/var/ossec/etc/rules/local_rules.xml` on the Wazuh server. Full file: [rules/local_rules.xml](rules/local_rules.xml)
 
 ```xml
 <group name="local,sshd,authentication_success,">

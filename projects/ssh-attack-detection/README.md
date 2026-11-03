@@ -22,7 +22,7 @@ Everything was done inside my own home lab, against my own VMs. Setup for the la
 | Tools | Hydra, journalctl, fail2ban, OpenSSH |
 | Test account | labuser1 (regular user, no sudo) |
 
-I made a separate test account so all the activity in the logs is tied to one user and so I didn't risk locking out my real admin account.
+To keep all the activity in the logs tied to one user, I made a separate test account. That way I also didn't risk locking out my real admin account.
 
 Note: Ubuntu logs in UTC and Kali shows Florida time (UTC-5). All times below are UTC. The baseline and first attack were on 2026-11-01, the fail2ban setup and re-test were the next day, 2026-11-02.
 
@@ -40,7 +40,7 @@ Before doing anything I checked the firewall and SSH settings so I had a "before
 | PermitRootLogin | prohibit-password | Root can't log in with a password |
 | PasswordAuthentication | yes | Password logins allowed, this is what makes brute force possible |
 
-Then I did a few manual logins from Kali to make sure logging worked. This ended up being a good example on its own:
+Before the real attack I did a few manual logins from Kali to make sure logging worked. This ended up being a good example on its own:
 
 - 15:07:58 - 3 failed attempts against `labuser`, a username that doesn't exist (I typo'd it)
 - 15:09:53 - 3 failed attempts against `labuser1`, a real account
@@ -54,7 +54,7 @@ If I saw this in a real SOC, failures followed by a success from the same IP is 
 
 ## 2. The attack
 
-I made a small wordlist of 20 common passwords and left the real password out on purpose, so the attack would fail every time and the real password never shows up anywhere.
+For the wordlist I used 20 common passwords and left the real one out on purpose, so the attack would fail every time and the real password never shows up anywhere.
 
 ```
 hydra -l labuser1 -P ~/lab_passwords.txt -t 4 -V ssh://192.168.56.101
@@ -140,7 +140,7 @@ ignoreip = 127.0.0.1/8 ::1 192.168.56.1
 
 At first fail2ban was only reading log lines from a process called `sshd`. But on this version of Ubuntu the failed logins come from `sshd-session`, a separate process newer OpenSSH uses. So fail2ban wasn't going to see any of the failures and would never ban anything. I fixed it by adding the `journalmatch` line so it reads everything from the SSH service.
 
-I tested it before running the attack by failing 2 logins from Kali and checking that fail2ban counted them (`Total failed: 2`). Glad I checked, otherwise the re-test would've just looked like fail2ban didn't work.
+Before running the attack I tested it by failing 2 logins from Kali and checking that fail2ban counted them (`Total failed: 2`). Glad I checked, otherwise the re-test would've just looked like fail2ban didn't work.
 
 ## 5. Validation: same attack again
 
@@ -199,7 +199,7 @@ One thing I noticed: Hydra's screen says it finished all 20 of 20 tries, but Ubu
 
 ## Next project
 
-I looked at the same attack from the network side in [Network Traffic Investigation](../network-traffic-investigation/).
+The same attack from the network side is in [Network Traffic Investigation](../network-traffic-investigation/).
 
 ## Evidence
 

@@ -27,7 +27,7 @@ Every capture used this filter so it only picked up Kali's traffic:
 sudo tcpdump -i enp0s8 -nn -w <file>.pcap host 192.168.56.102
 ```
 
-I was connected to Ubuntu over SSH from my Windows host while capturing. Without `host 192.168.56.102` the capture would have been full of my own session.
+My Windows host was connected to Ubuntu over SSH the whole time I was capturing. Without `host 192.168.56.102` the capture would have been full of my own session.
 
 All times are UTC.
 
@@ -185,4 +185,4 @@ Filter: `tcp.flags.syn == 1 || icmp`
 
 ## Next project
 
-I added a SIEM to the lab and ran these attacks again in [SIEM Detection with Wazuh](../wazuh-siem-detection/).
+With a SIEM added to the lab, I ran these attacks again in [SIEM Detection with Wazuh](../wazuh-siem-detection/).
