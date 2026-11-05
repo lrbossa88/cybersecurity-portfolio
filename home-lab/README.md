@@ -72,6 +72,7 @@ This is the current state of the lab. Each item links to the project where I set
 - Custom rule **100100**: level 12 alert for a successful SSH login after failed attempts from the same IP ([Wazuh project](../projects/wazuh-siem-detection/))
 - Custom rule **100200**: raises Suricata's highest severity alerts to level 12 ([Suricata project](../projects/suricata-ids-detection/))
 - Custom rule **100300**: level 14 alert for a new local account added to Administrators within 5 minutes, and **100301** tunes a PowerShell false positive down from level 15 to 3 ([Windows project](../projects/windows-sysmon-detection/))
+- Custom rule **100400**: level 12 alert for password spraying, one source IP failing logon against several different accounts in a short window ([AD project](../projects/active-directory-attacks/))
 
 ## Building it
 

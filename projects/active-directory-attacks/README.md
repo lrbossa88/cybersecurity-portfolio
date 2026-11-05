@@ -1,8 +1,8 @@
 # Active Directory Attacks and Detection
 
-This is the lab I was building toward the whole time. The last project put one Windows machine into my lab. This one adds a Windows Server 2025 domain controller, joins the Windows 11 box to the domain, and runs the attacks a SOC actually deals with in Active Directory: password spraying, Kerberoasting and AS-REP roasting. Everything reports into Wazuh.
+This is the lab I was building toward the whole time. The last project put one Windows machine into my lab. This one adds a Windows Server 2025 domain controller, joins the Windows 11 box to the domain, and runs the attacks a SOC actually deals with in Active Directory: password spraying, Kerberoasting and AS-REP roasting. Everything reports into Wazuh, and this time I wrote and tested a custom rule to catch the spray instead of just logging it.
 
-Some of these attacks worked exactly like the textbook. Some got stopped by Server 2025's defaults, which turned out to be a better finding than if they'd just worked. I wrote both down.
+Some of these attacks worked exactly like the textbook. Some got stopped by Server 2025's defaults, which turned out to be a better finding than if they'd just worked. I wrote both down, including the parts that fought me.
 
 Everything was done inside my own home lab, against my own VMs. Lab setup: [Home Lab Setup](../../home-lab/)
 
@@ -10,9 +10,10 @@ Everything was done inside my own home lab, against my own VMs. Lab setup: [Home
 
 - Built a domain (`lab.local`) on Windows Server 2025, joined the Windows 11 machine to it, and put a Wazuh agent on the DC
 - **Password spray:** one common password against every account found 5 valid logins, including a Domain Admin. In Wazuh it barely registered, the opposite of the loud RDP brute force from my last project
-- **Kerberoasting:** the attack ran and the DC logged it (event 4769), but **Server 2025 wouldn't hand out a crackable RC4 ticket**, so the offline crack was blocked by default
+- **Wrote a custom spray rule (100400):** it fires at **level 12** when one source IP fails logon against several different accounts in a short window. Tested it, it caught the spray where the built-in rules only saw scattered failures
+- **Kerberoasting:** the attack ran and the DC logged it (event 4769), but **Server 2025 would not hand out a crackable RC4 ticket**. I pushed on this one hard and proved it was the KDC itself refusing, not a setting I missed
 - **AS-REP roasting:** correctly found the one account with pre-auth disabled, and hit the same encryption wall
-- **Detection gap:** Wazuh logs these Kerberos events but rates them at level 3, the same as a normal login. Nothing says "this looks like an attack"
+- **Tooling finding:** the impacket on my Kali only ever requests RC4, so once the DC stopped issuing RC4 no account setting could help. Pulling a crackable ticket here needs an AES-aware tool, which is the follow-up
 
 ## Lab and tools
 
@@ -91,25 +92,45 @@ That's the whole lesson, and it's a sharp contrast with my last project:
 | Lockout | Yes, account locked | No, stays under the limit |
 | Alert | Level 10 | Looks like normal logins |
 
-A brute force screams. A spray whispers. That's why it's the technique that actually works.
+A brute force screams. A spray whispers. That's why it's the technique that actually works. Section 5 is where I tried to give the quiet version an alert.
 
 ## 3. Kerberoasting
 
 In Active Directory, any logged-in user can ask the domain controller for a service account's ticket, and that ticket is encrypted with the service account's password. So you ask as a normal user, take the ticket offline, and try to crack the password without the DC ever seeing you guess.
 
-I requested svc_sql's ticket two ways: from inside the domain as asmith, and from Kali with impacket:
+I requested svc_sql's ticket from Kali with impacket:
 
 ```
 impacket-GetUserSPNs lab.local/asmith:'Passw0rd!' -dc-host dc01.lab.local -request -outputfile kerb.txt
 ```
 
-The request itself worked, and the DC logged **event 4769** for svc_sql every time. But the crack never happened, because of something I didn't expect:
+The request itself worked, the tool found svc_sql by its SPN, and the DC logged **event 4769** for it every time. But the crack never happened, because of this:
 
 ```
 KDC_ERR_ETYPE_NOSUPP (KDC has no support for encryption type)
 ```
 
-**Server 2025 ships with the old RC4 encryption disabled.** The cracking tools request the ticket in RC4 because it's the easiest to crack, and the DC refuses. I tried enabling RC4 on the account and even on the DC's Kerberos service, and the domain still wouldn't issue a weak ticket. In an older domain this attack usually just works and the service account password falls in seconds. Here the default config stopped it.
+**Server 2025 ships with the old RC4 encryption disabled.** The cracking tools request the ticket in RC4 because it's the easiest to crack, and the DC refuses to issue one.
+
+I did not take that at face value. I wanted to know whether it was the account, a policy, or the DC itself, so I checked each layer:
+
+```
+reg query "HKLM\SYSTEM\CurrentControlSet\Control\Lsa\Kerberos\Parameters" /v SupportedEncryptionTypes
+```
+
+The DC's own Kerberos was already set to `0x7fffffff`, which is every encryption type including RC4. So the DC was not configured to block it. I then set svc_sql to RC4 only and reset its password, so the account had nothing but an RC4 key to hand out:
+
+```
+Set-ADUser svc_sql -KerberosEncryptionType RC4
+Set-ADAccountPassword svc_sql -Reset -NewPassword (ConvertTo-SecureString "Summer2024" -AsPlainText -Force)
+Restart-Service Kdc -Force
+```
+
+<img src="screenshots/06_rc4_encryption_check.png" alt="the DC allows every encryption type and the account is set to RC4, and the KDC still would not issue a ticket" width="800">
+
+The check above says it all: the DC's Kerberos allows every type (`0x7fffffff`) and svc_sql's `msDS-SupportedEncryptionTypes` is `28` (RC4 plus AES). I re-ran the roast anyway, same `KDC_ERR_ETYPE_NOSUPP`. The account allowed only RC4, the DC allowed everything, and the KDC still would not mint the ticket. So this isn't a setting I missed. **On this build the KDC refuses to issue an RC4 service ticket at all**, no matter how the account or the policy is configured.
+
+There was a tooling piece too. The impacket version on my Kali only ever asks for an RC4 ticket, so once the DC stopped issuing RC4 there was no account setting that would help, even setting the account to AES only still failed because the tool never asked for AES. To actually pull a crackable ticket here I'd need a tool that requests an AES ticket (Rubeus), then crack the AES hash offline. That's the follow-up, listed at the end.
 
 That's a better result than a successful crack, honestly. It shows that keeping a domain on modern defaults, AES only, takes a whole class of attack off the table. It's also a real thing a defender should check: if someone later turns RC4 back on for a compatibility fix, they've reopened this door.
 
@@ -119,7 +140,7 @@ The 4769 events did reach Wazuh:
 
 <img src="screenshots/05_kerberos_events_level3.png" alt="kerberos events at level 3" width="800">
 
-Every single one came in at **level 3**, mapped to generic rules like "Windows Logon Success." A service ticket request for a service account is the exact fingerprint of Kerberoasting, and nothing flagged it. That's the detection gap a custom rule would close: watch for a user requesting service tickets for SPN accounts, especially several in a row, and raise it above the noise.
+Every single one came in at **level 3**, mapped to generic rules like "Windows Logon Success." A service ticket request for a service account is the exact fingerprint of Kerberoasting, and nothing flagged it. That's a detection gap a custom rule would close, and now that RC4 is off the rule has to watch for the AES request pattern instead of the classic RC4 ticket. I've got that on the next-steps list.
 
 ## 4. AS-REP roasting
 
@@ -133,6 +154,48 @@ It correctly picked out **svc_legacy** as the only account missing pre-auth (eve
 
 Two attacks, same Server 2025 defense. Consistent, and worth knowing.
 
+## 5. Writing a detection rule for the spray
+
+Back to section 2. The spray is the attack that actually worked here, and it's the one Wazuh barely noticed. Wazuh's built-in rule for Windows failures is **60204 "Multiple Windows Logon Failures."** It fires on volume, a bunch of 4625s in a window, and it can't tell the difference between a spray and one account getting brute forced. I wanted a rule that keys on the shape of a spray specifically: **one source IP failing against several different accounts.**
+
+This went in `/var/ossec/etc/rules/local_rules.xml` on the Wazuh server:
+
+```xml
+<group name="ad_attacks,authentication_failures,">
+  <rule id="100400" level="12" frequency="6" timeframe="60">
+    <if_matched_group>authentication_failed</if_matched_group>
+    <same_field>win.eventdata.ipAddress</same_field>
+    <different_field>win.eventdata.targetUserName</different_field>
+    <description>Password spraying detected: one source IP failed logon against multiple different accounts (Windows 4625) within 60 seconds.</description>
+    <mitre>
+      <id>T1110.003</id>
+    </mitre>
+    <group>password_spray,pci_dss_10.2.4,pci_dss_10.2.5,</group>
+  </rule>
+</group>
+```
+
+- `if_matched_group authentication_failed` builds on the failure events Windows is already generating, so I'm not re-decoding 4625 myself
+- `same_field win.eventdata.ipAddress` + `different_field win.eventdata.targetUserName` is the whole point. Same source, different targets. That's a spray, not someone fat-fingering their own password
+- `frequency 6` in a `60` second window, `level 12`. Higher than the built-in volume rule, because this one means something specific
+- MITRE **T1110.003 Password Spraying**
+
+### Testing it
+
+I sprayed a password that none of the accounts use, which is the normal situation for a spray, the attacker is guessing. Eight failures from one IP across eight different accounts:
+
+```
+nxc smb 192.168.56.105 -u users.txt -p 'FakePass123!'
+```
+
+<img src="screenshots/07_spray_rule_100400.png" alt="custom spray rule fired at level 12" width="800">
+
+**Rule 100400 fired at level 12**, MITRE T1110.003, with the source IP and the list of targeted accounts. The built-in 60204 still fired too, so now there's a plain "lots of failures" alert and a sharper "this is a spray" alert sitting next to it.
+
+One honest catch. This rule needs the spray to fail a lot. The quiet spray from section 2, the one that actually got helpdesk, used a password that was already valid, so it only produced a couple of failures and would slide right under this rule. That's the same reason it was dangerous in the first place. Catching that version means correlating successful logons by source, not failures, which is on the next-steps list.
+
+A note on the build, because it's a good lesson: my first version used `authentication_failures` (plural) in the `if_matched_group`, and it never fired. That's the group name Wazuh puts on the finished alert, but it's not the group it uses to chain the raw failure events together. Reading the built-in 60204 rule showed me the right one, `authentication_failed`. One word, and the rule sat silent until I matched it exactly.
+
 ## Triage notes
 
 ### Password spray (the quiet one)
@@ -141,7 +204,7 @@ Two attacks, same Server 2025 defense. Consistent, and worth knowing.
 
 **What:** One password tried against 8 accounts. 5 succeeded, including the helpdesk Domain Admin
 
-**When:** 2026-11-03
+**When:** 2026-11-05
 
 **Where:** DC01, 192.168.56.105
 
@@ -149,11 +212,11 @@ Two attacks, same Server 2025 defense. Consistent, and worth knowing.
 
 **Severity:** Critical. A Domain Admin account is compromised and the logon looks normal, so it won't jump out in the logs
 
-**What I'd do:** This is the hard part, because there's no single loud alert. I'd look for one source IP authenticating as several different users in a short window, even if each one succeeded. Then force a password reset on helpdesk and every account that matched, check what helpdesk did after logging in, and get everyone off the shared password. Long term, this is why MFA and a ban on common passwords exist. In this case it was my own test.
+**What I'd do:** Look for one source IP authenticating as several different users in a short window, even when the attempts succeed. My rule 100400 now catches the failing version of that automatically. Then force a password reset on helpdesk and every account that matched, check what helpdesk did after logging in, and get everyone off the shared password. Long term, this is why MFA and a ban on common passwords exist. In this case it was my own test.
 
 ### Kerberoasting / AS-REP roasting
 
-**Who:** asmith (a normal domain user), from WIN11-LAB
+**Who:** asmith (a normal domain user), from Kali
 
 **What:** Requested a service ticket for svc_sql (4769), and requested AS-REP data for svc_legacy
 
@@ -165,26 +228,33 @@ Two attacks, same Server 2025 defense. Consistent, and worth knowing.
 
 ## Issues I ran into
 
-**Kali tools couldn't Kerberoast Server 2025.** Both impacket and NetExec failed with `KDC_ERR_ETYPE_NOSUPP`. The version on my Kali requests RC4 tickets, and Server 2025 disables RC4 by default. I spent a while trying to force RC4 back on, on the account and on the DC, and the domain still wouldn't issue a weak ticket. I decided this was the finding, not a bug to fix: modern AD resists the classic attack out of the box.
+**The Wazuh disk filled to 100% and nothing would start.** The indexer kept failing with "No space left on device." The Vulnerability Detection module had filled the 25 GB disk, its feed folders came to about 20 GB, and a single feed file in `vd_updater` was 4.3 GB on its own. What threw me for a while: deleting the feed files looked like it did nothing. `df` stayed at 100% after a clean `rm`. Two reasons. The services were still running and holding the deleted files open, so the space never came back, and the module just re-downloaded the feed on the next start. The fix was to stop every service (manager, indexer, dashboard and filebeat), clear the feed, and disable Vulnerability Detection so it stops pulling a feed too big for this disk. Lesson I'll keep: `df` said full and `du` said the files were there, both were right, I was reading them before the services let go.
 
-**The DC clock was 3 hours behind.** New events were landing in Wazuh stamped 3 hours in the past, so they never showed up in the dashboard's "last 15 minutes." Turned out the server was still on Pacific time while the rest of the lab was on Eastern. Events in the Windows Security log were correct, the dashboard window was just looking in the wrong place. Set-TimeZone fixed it. Good reminder that time sync is not optional in a SIEM, and that a quiet dashboard doesn't always mean nothing happened.
+**Kali tools couldn't Kerberoast Server 2025, and I proved why.** Both impacket and NetExec failed with `KDC_ERR_ETYPE_NOSUPP`. I went through it layer by layer: the DC's Kerberos already allowed every encryption type, I set the service account to RC4 only, and the KDC still refused to issue an RC4 ticket. So it's the KDC on this build, not a policy or the account. On top of that, the impacket on my Kali only ever requests RC4, so even setting the account to AES only didn't help, the tool never asked for AES. The clean takeaway is that modern AD resists the classic attack out of the box, and pulling a crackable ticket here needs an AES-aware tool, not a config change.
+
+**My spray rule was silent over one wrong word.** First version matched `authentication_failures`, the group name on the finished alert, instead of `authentication_failed`, the group Wazuh uses to chain the raw failure events. It parsed fine and never fired. Reading the built-in rule that does work (60204) showed me the exact group to match.
+
+**The DC clock was 3 hours behind.** New events were landing in Wazuh stamped 3 hours in the past, so they never showed up in the dashboard's "last 15 minutes." The server was still on Pacific time while the rest of the lab was on Eastern. The events were fine, the dashboard window was looking in the wrong place. `Set-TimeZone` fixed it. Good reminder that time sync is not optional in a SIEM, and that a quiet dashboard doesn't always mean nothing happened.
 
 ## Lessons learned
 
 - **The quiet attack is the dangerous one.** The spray compromised a Domain Admin and looked like a normal login, while last project's noisy brute force got caught instantly
+- **Logging an event isn't detecting it.** The spray and the Kerberoast events were right there in Wazuh at low levels until I wrote a rule that knew what the pattern meant, and even then my rule only catches the loud version of the spray
+- **Match the detection to the shape of the attack, not just the volume.** The built-in rule counts failures. Mine looks for one source hitting many accounts, which is what a spray actually is
+- **Match the engine's exact field.** One wrong word in the group name and the rule never fired. The working built-in rule is the best reference for how to wire a new one
 - **Modern defaults matter.** Server 2025 blocking RC4 shut down two classic attacks with no work from me. The flip side is that one compatibility change could reopen them
-- **A SIEM logging an event isn't the same as detecting it.** The Kerberoast events were right there in Wazuh at level 3, indistinguishable from normal traffic, until someone writes a rule that knows what the pattern means
-- **Check the clock.** A time skew made it look like Wazuh was broken when it was working fine
+- **Check the clock, and check your tools.** A time skew made Wazuh look broken, and my cracking tool's fixed RC4 request hid the fact that the DC's refusal was the real wall
 
 ## Limitations
 
-- Everything ran from one attacker against a small, quiet domain. A real one has thousands of logons an hour, which is exactly what makes a spray so easy to hide in
-- Because Server 2025 blocked the roasting cracks, I didn't get to show the full chain of cracking a service account and reusing it. I'd need to deliberately weaken the domain's encryption settings to demo that, which I may do in a follow-up
-- I focused on the attacks and the logging. I didn't finish writing and testing the custom detection rules, which is the natural next step
+- **No successful crack.** Server 2025 blocked RC4 and my Kali tooling only requests RC4, so the roasting attacks proved the defense but never produced a cracked password. Showing the full chain here means using a tool that requests AES (Rubeus) and cracking the AES hash, or deliberately weakening the domain's encryption. That's a planned follow-up, not a finished result
+- **The spray rule only catches the loud spray.** A spray that uses an already-valid password, like the one that got helpdesk, only fails a couple of times and slips under rule 100400. Catching that needs correlating successful logons by source, not failures
+- **Small, quiet domain, one attacker.** A real domain has thousands of logons an hour, which is exactly what makes a spray so easy to hide in
 
 ## What I'd do next
 
-- Write and test a Wazuh rule for password spraying: one source, many target accounts, short time window
-- Write a rule for a user requesting several service tickets quickly (the Kerberoasting pattern)
-- Set up a second domain-joined machine so I can show lateral movement, logging in to one box with creds stolen from another
-- Turn on Wazuh active response so a confirmed attack can disable an account or block an IP on its own
+- Write a Kerberoast detection rule. With RC4 off, it has to watch for the AES service ticket pattern, one user requesting 4769 tickets for several SPN accounts in a row, rather than the classic RC4 ticket
+- Pull a crackable ticket with an AES-aware tool (Rubeus) and crack it offline, to show the full Kerberoast chain end to end
+- Detect the quiet spray by correlating successful logons from one source across many accounts, not just failures
+- Set up a second domain-joined machine to show lateral movement, logging in to one box with creds stolen from another
+- Turn on Wazuh active response so a confirmed spray can disable an account or block an IP on its own

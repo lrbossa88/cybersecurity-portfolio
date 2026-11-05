@@ -2,13 +2,13 @@
 
 I'm working toward a SOC Analyst Tier 1 role. This portfolio has my home lab projects, where I attack and defend my own VMs and document it like a real investigation, plus my coursework from the Google Cybersecurity Certificate.
 
-The lab projects build on each other: I found an SSH brute force in the logs, then looked at it in the packets, then set up a SIEM to catch it automatically and wrote a custom rule for what the SIEM missed. The SIEM couldn't see the port scan, so I added a network IDS and wrote a second rule so its most serious alerts don't get buried. Then I added a Windows 11 machine with Sysmon, attacked it over RDP and planted a backdoor admin account. The last one builds a full Active Directory domain and runs the attacks a SOC sees in AD: password spraying, Kerberoasting and AS-REP roasting.
+The lab projects build on each other: I found an SSH brute force in the logs, then looked at it in the packets, then set up a SIEM to catch it automatically and wrote a custom rule for what the SIEM missed. The SIEM couldn't see the port scan, so I added a network IDS and wrote a second rule so its most serious alerts don't get buried. Then I added a Windows 11 machine with Sysmon, attacked it over RDP and planted a backdoor admin account. The last one builds a full Active Directory domain and runs the attacks a SOC sees in AD: password spraying, Kerberoasting and AS-REP roasting, and I wrote a rule to catch the spray that otherwise looked like a normal login.
 
 ## Home Lab Projects
 
 | Project | What I did | Skills |
 |---|---|---|
-| [Active Directory Attacks and Detection](projects/active-directory-attacks/) | Built a Windows Server 2025 domain, joined the Windows 11 box to it, and ran password spraying, Kerberoasting and AS-REP roasting. Sprayed a Domain Admin that looked like a normal login in the SIEM, and found Server 2025 blocks RC4 roasting by default | Active Directory, Windows Server, password spraying, Kerberoasting, domain security, MITRE ATT&CK |
+| [Active Directory Attacks and Detection](projects/active-directory-attacks/) | Built a Windows Server 2025 domain, joined the Windows 11 box to it, and ran password spraying, Kerberoasting and AS-REP roasting. Sprayed a Domain Admin that looked like a normal login in the SIEM, **wrote a custom rule** to catch the spray, and proved Server 2025 blocks RC4 roasting by default | Active Directory, Windows Server, password spraying, Kerberoasting, custom detection rules, domain security, MITRE ATT&CK |
 | [Windows Endpoint Detection with Sysmon and Wazuh](projects/windows-sysmon-detection/) | Added a Windows 11 machine with Sysmon feeding Wazuh. Brute forced RDP, then created a backdoor admin account and ran encoded PowerShell. The backdoor only raised a level 8 while a harmless PowerShell file raised a level 15, so I **wrote a correlation rule** for the backdoor and **tuned out the false positive** | Windows Event Logs, Sysmon, Wazuh, custom detection rules, alert tuning, MITRE ATT&CK |
 | [Network IDS with Suricata: Catching What the SIEM Missed](projects/suricata-ids-detection/) | Added Suricata to the lab, caught the port scan Wazuh missed and flagged the brute force 5.7 seconds before fail2ban blocked it. Sent its alerts to Wazuh, found they all came in at level 3, and **wrote a custom rule** that raises Suricata's highest severity to level 12 | Suricata, network IDS, Wazuh, custom detection rules, MITRE ATT&CK |
 | [SIEM Detection with Wazuh: Finding and Fixing a Detection Gap](projects/wazuh-siem-detection/) | Connected Ubuntu to a Wazuh SIEM and re-ran my attacks. Found that a successful login after failed attempts only raised a level 3 alert, so I **wrote a custom Wazuh rule** that raises a level 12 and tested it | Wazuh, SIEM alert triage, custom detection rules, MITRE ATT&CK |
@@ -61,7 +61,7 @@ More details: [certifications](certifications/)
 - Google Cybersecurity Certificate coursework
 
 **Planned**
-- Write and test custom Wazuh rules for password spraying and Kerberoasting
+- Write and test a custom Wazuh rule for Kerberoasting (the password spray rule is done, in the AD project)
 - Add a firewall to the home lab
 
 ## Contact
