@@ -67,7 +67,7 @@ netexec smb 192.168.56.105 -u users.txt -p 'Passw0rd!' --continue-on-success
 
 <img src="screenshots/02_password_spray_kali.png" alt="password spray" width="800">
 
-Five hits, including **helpdesk**, which is a Domain Admin. One weak shared password handed over the keys to the domain. That's not a made-up scenario, it's how a lot of real breaches start.
+Five hits, including **helpdesk**, which is a Domain Admin. One weak password, shared across the office, was enough to log in with Domain Admin rights. Reused passwords like that are a common starting point for real intrusions.
 
 ### What the DC logged
 
@@ -92,7 +92,7 @@ That's the whole lesson, and it's a sharp contrast with my last project:
 | Lockout | Yes, account locked | No, stays under the limit |
 | Alert | Level 10 | Looks like normal logins |
 
-A brute force screams. A spray whispers. That's why it's the technique that actually works. Section 5 is where I tried to give the quiet version an alert.
+The brute force in my last project tripped alerts right away. This spray didn't, which is what makes it effective, and what the rule in Section 5 tries to catch.
 
 ## 3. Kerberoasting
 
@@ -132,7 +132,7 @@ The check above says it all: the DC's Kerberos allows every type (`0x7fffffff`) 
 
 There was a tooling piece too. The impacket version on my Kali only ever asks for an RC4 ticket, so once the DC stopped issuing RC4 there was no account setting that would help, even setting the account to AES only still failed because the tool never asked for AES. To actually pull a crackable ticket here I'd need a tool that requests an AES ticket (Rubeus), then crack the AES hash offline. That's the follow-up, listed at the end.
 
-That's a better result than a successful crack, honestly. It shows that keeping a domain on modern defaults, AES only, takes a whole class of attack off the table. It's also a real thing a defender should check: if someone later turns RC4 back on for a compatibility fix, they've reopened this door.
+For a lab, this is a more useful result than a crack would have been. A domain left on modern defaults, AES only, takes a whole class of attack off the table. It's also something a defender should check: if someone turns RC4 back on later for a compatibility fix, they reopen this door.
 
 ### What the DC logged
 
@@ -176,7 +176,7 @@ This went in `/var/ossec/etc/rules/local_rules.xml` on the Wazuh server:
 ```
 
 - `if_matched_group authentication_failed` builds on the failure events Windows is already generating, so I'm not re-decoding 4625 myself
-- `same_field win.eventdata.ipAddress` + `different_field win.eventdata.targetUserName` is the whole point. Same source, different targets. That's a spray, not someone fat-fingering their own password
+- `same_field win.eventdata.ipAddress` + `different_field win.eventdata.targetUserName` is the core of it: one source IP failing against several different accounts. That pattern is what separates a spray from one account getting a few wrong passwords
 - `frequency 6` in a `60` second window, `level 12`. Higher than the built-in volume rule, because this one means something specific
 - MITRE **T1110.003 Password Spraying**
 
@@ -185,16 +185,16 @@ This went in `/var/ossec/etc/rules/local_rules.xml` on the Wazuh server:
 I sprayed a password that none of the accounts use, which is the normal situation for a spray, the attacker is guessing. Eight failures from one IP across eight different accounts:
 
 ```
-nxc smb 192.168.56.105 -u users.txt -p 'FakePass123!'
+netexec smb 192.168.56.105 -u users.txt -p 'FakePass123!'
 ```
 
 <img src="screenshots/07_spray_rule_100400.png" alt="custom spray rule fired at level 12" width="800">
 
 **Rule 100400 fired at level 12**, MITRE T1110.003, with the source IP and the list of targeted accounts. The built-in 60204 still fired too, so now there's a plain "lots of failures" alert and a sharper "this is a spray" alert sitting next to it.
 
-One honest catch. This rule needs the spray to fail a lot. The quiet spray from section 2, the one that actually got helpdesk, used a password that was already valid, so it only produced a couple of failures and would slide right under this rule. That's the same reason it was dangerous in the first place. Catching that version means correlating successful logons by source, not failures, which is on the next-steps list.
+One limitation worth stating. This rule needs the spray to fail a lot. The spray from Section 2 that actually got helpdesk used a password that was already valid, so it produced only a couple of failures and would stay under this rule's threshold. Catching that version means correlating successful logons by source IP, not failures, which is on the next-steps list.
 
-A note on the build, because it's a good lesson: my first version used `authentication_failures` (plural) in the `if_matched_group`, and it never fired. That's the group name Wazuh puts on the finished alert, but it's not the group it uses to chain the raw failure events together. Reading the built-in 60204 rule showed me the right one, `authentication_failed`. One word, and the rule sat silent until I matched it exactly.
+One thing from building it: my first version used `authentication_failures` (plural) in `if_matched_group` and never fired. That plural is the group name Wazuh puts on the finished alert; the group it uses to chain the raw failure events is `authentication_failed`, singular. The built-in 60204 rule showed me the right one.
 
 ## Triage notes
 
@@ -209,6 +209,8 @@ A note on the build, because it's a good lesson: my first version used `authenti
 **Where:** DC01, 192.168.56.105
 
 **MITRE ATT&CK:** T1110.003 Password Spraying, T1078 Valid Accounts
+
+**When:** 2026-11-03
 
 **Severity:** Critical. A Domain Admin account is compromised and the logon looks normal, so it won't jump out in the logs
 
@@ -238,12 +240,12 @@ A note on the build, because it's a good lesson: my first version used `authenti
 
 ## Lessons learned
 
-- **The quiet attack is the dangerous one.** The spray compromised a Domain Admin and looked like a normal login, while last project's noisy brute force got caught instantly
-- **Logging an event isn't detecting it.** The spray and the Kerberoast events were right there in Wazuh at low levels until I wrote a rule that knew what the pattern meant, and even then my rule only catches the loud version of the spray
-- **Match the detection to the shape of the attack, not just the volume.** The built-in rule counts failures. Mine looks for one source hitting many accounts, which is what a spray actually is
-- **Match the engine's exact field.** One wrong word in the group name and the rule never fired. The working built-in rule is the best reference for how to wire a new one
-- **Modern defaults matter.** Server 2025 blocking RC4 shut down two classic attacks with no work from me. The flip side is that one compatibility change could reopen them
-- **Check the clock, and check your tools.** A time skew made Wazuh look broken, and my cracking tool's fixed RC4 request hid the fact that the DC's refusal was the real wall
+- **A successful spray barely shows up.** It compromised a Domain Admin and logged like a normal login, while the noisy brute force from my last project got caught right away
+- **Wazuh logged these events without flagging them.** The spray and Kerberoast events sat at low levels until I wrote a rule for the pattern, and even that rule only catches the loud version of the spray
+- **A spray has a shape: one source, many accounts.** The built-in rule only counts failure volume. Mine keys on that shape
+- **Match the engine's exact field.** One wrong word in the group name and the rule never fired. The built-in rule that already works is the best reference for wiring a new one
+- **Modern defaults did real work.** Server 2025 blocking RC4 shut down two classic attacks on its own, though one compatibility change could reopen them
+- **Check the clock, and check your tools.** A time skew made Wazuh look broken, and my cracking tool only ever requesting RC4 hid that the DC's refusal was the real wall
 
 ## Limitations
 
